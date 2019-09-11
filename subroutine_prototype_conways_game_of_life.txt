@@ -1,0 +1,183 @@
+declare routineName
+routineName = "PROTOTYPE_CONWAYS_GAME_OF_LIFE"
+' ====================================================================================
+' Change History:
+'
+' Date				By					Reason
+' 10-Sep-2019		Cody Herrmann		Initial_version
+' ====================================================================================
+'
+' This subroutine implements the famous Conway's Game of Life
+'
+' ====================================================================================
+' Setup Game Parameters
+DECLARE arrayBounds liveCellCutoff liveColor deadColor
+
+arrayBounds = 15
+liveCellCutoff = 0.95
+
+liveColor = "FF0000"
+deadColor = "FFFFFF"
+' ====================================================================================
+' Generate the Initial Seed Array
+DECLARE i j seedArray
+
+FOR i = 1 TO arrayBounds STEP 1 
+	FOR j = 1 TO arrayBounds STEP 1
+		
+		seedArray[i,j] = Rnd(i*j) 
+		
+		IF (seedArray[i,j] >= liveCellCutoff) THEN 
+			seedArray[i,j] = 1
+		ELSE 
+			seedArray[i,j] = 0
+		ENDIF
+		
+	NEXT 
+NEXT 
+' ====================================================================================
+' Loop and display the generations
+DECLARE seedCount continueSimulation previousSeed
+DECLARE neighbors curVal nextVal
+DECLARE htmlOut CRLF dblQt tmp
+
+CRLF = CHR(13) + CHR(10) 
+dblQt = CHR(34) 
+
+seedCount = 0
+continueSimulation = TRUE 
+
+WHILE (continueSimulation)
+	' ====================================================================================
+	' Cache Previous Seed
+	status = ClearArray("previousSeed") 
+	
+	FOR i = 1 TO arrayBounds STEP 1 
+		FOR j = 1 TO arrayBounds STEP 1
+			previousSeed[i,j] = seedArray[i,j] 
+		NEXT 
+	NEXT 
+	' ====================================================================================
+	' Update Seed
+	IF (seedCount <> 0) THEN 
+	
+		FOR i = 1 TO arrayBounds STEP 1 
+			FOR j = 1 TO arrayBounds STEP 1
+				' ====================================================================================
+				' Determine Neighbor Count
+				neighbors = 0
+				curVal = previousSeed[i,j]
+				
+				IF (previousSeed[i - 1,j] > 0) THEN
+					neighbors = neighbors + 1
+				ENDIF 
+				
+				IF (previousSeed[i - 1, j + 1] > 0) THEN
+					neighbors = neighbors + 1
+				ENDIF 
+				
+				IF (previousSeed[i - 1, j - 1] > 0) THEN
+					neighbors = neighbors + 1
+				ENDIF 
+				
+				IF (previousSeed[i, j + 1] > 0) THEN
+					neighbors = neighbors + 1
+				ENDIF 
+				
+				IF (previousSeed[i,j - 1] > 0) THEN
+					neighbors = neighbors + 1
+				ENDIF 
+				
+				IF (previousSeed[i + 1,j] > 0) THEN
+					neighbors = neighbors + 1
+				ENDIF 
+				
+				IF (previousSeed[i + 1, j - 1] > 0) THEN
+					neighbors = neighbors + 1
+				ENDIF 
+				
+				IF (previousSeed[i + 1, j + 1] > 0) THEN
+					neighbors = neighbors + 1
+				ENDIF 
+				' ====================================================================================
+				' Update next generation value
+				nextVal = 0
+				
+				SELECTCASE curVal 
+				CASE 1
+					IF (neighbors >= 2) AND (neighbors <= 3) THEN
+						nextVal = 1
+					ELSE 
+						nextVal = 0
+					ENDIF 
+				CASE 0
+					IF (neighbors = 3) THEN 
+						nextVal = 1
+					ENDIF 
+				CASE ELSE 				
+				ENDSELECT
+					
+				seedArray[i,j] = nextVal 
+				' ====================================================================================
+			NEXT 
+		NEXT
+		
+	ENDIF 
+	' ====================================================================================
+	' Build HTML Text
+	htmlOut = ""
+	htmlOut = htmlOut + "<h3>Current Generation: " + seedCount + "</h3>" + CRLF
+	htmlOut = htmlOut + "<table width={dblQt}100%{dblQt} height={dblQt}300px{dblQt} border={dblQt}1px{dblQt}>" + CRLF
+	
+	FOR i = 1 TO arrayBounds STEP 1 
+		
+		htmlOut = htmlOut + "<tr>" + CRLF
+		
+		FOR j = 1 TO arrayBounds STEP 1
+
+			tmp = "000000"
+			
+			SELECTCASE seedArray[i,j]
+			CASE 1
+				tmp = liveColor 
+			CASE 0
+				tmp = deadColor 
+			CASE ELSE 
+			ENDSELECT 
+
+			htmlOut = htmlOut + "<td bgcolor={dblQt}#{tmp}{dblQt}> </td>" + CRLF
+			htmlOut = StringReplace(htmlOut, "{tmp}", tmp , "T")
+			
+		NEXT
+		
+		htmlOut = htmlOut + "</tr>" + CRLF
+		
+	NEXT
+	' ====================================================================================
+	' Display to User and Prompt
+	htmlOut = htmlOut + "</table>" + CRLF
+	
+	htmlOut = StringReplace(htmlOut, "{dblQt}", dblQt , "T") 
+	htmlOut = StringReplace(htmlOut, "{tmp}", tmp , "T")
+	
+	MsgboxHtml(htmlOut) 
+	
+	IF (seedCount >= 15) THEN 
+		continueSimulation = FALSE 
+	ENDIF 
+	
+	' ====================================================================================
+	seedCount = seedCount + 1
+WEND 
+' ====================================================================================
+RETURN 
+
+
+
+
+
+
+
+
+
+
