@@ -13,8 +13,8 @@ routineName = "PROTOTYPE_CONWAYS_GAME_OF_LIFE"
 ' Setup Game Parameters
 DECLARE arrayBounds liveCellCutoff liveColor deadColor
 
-arrayBounds = 15
-liveCellCutoff = 0.95
+arrayBounds = 10
+liveCellCutoff = 0.75
 
 liveColor = "FF0000"
 deadColor = "FFFFFF"
@@ -25,7 +25,7 @@ DECLARE i j seedArray
 FOR i = 1 TO arrayBounds STEP 1 
 	FOR j = 1 TO arrayBounds STEP 1
 		
-		seedArray[i,j] = Rnd(i*j) 
+		seedArray[i,j] = Rnd(1) 
 		
 		IF (seedArray[i,j] >= liveCellCutoff) THEN 
 			seedArray[i,j] = 1
@@ -39,7 +39,7 @@ NEXT
 ' Loop and display the generations
 DECLARE seedCount continueSimulation previousSeed
 DECLARE neighbors curVal nextVal
-DECLARE htmlOut CRLF dblQt tmp
+DECLARE htmlOut CRLF dblQt tmp hasSurvivors
 
 CRLF = CHR(13) + CHR(10) 
 dblQt = CHR(34) 
@@ -66,37 +66,37 @@ WHILE (continueSimulation)
 				' ====================================================================================
 				' Determine Neighbor Count
 				neighbors = 0
-				curVal = previousSeed[i,j]
+				curVal = previousSeed[i,j] 
 				
-				IF (previousSeed[i - 1,j] > 0) THEN
+				IF (previousSeed[i - 1,j] > 0) AND (NotEmpty(previousSeed[i - 1,j])) THEN
 					neighbors = neighbors + 1
 				ENDIF 
 				
-				IF (previousSeed[i - 1, j + 1] > 0) THEN
+				IF (previousSeed[i - 1, j + 1] > 0) AND (NotEmpty(previousSeed[i - 1, j + 1])) THEN
 					neighbors = neighbors + 1
 				ENDIF 
 				
-				IF (previousSeed[i - 1, j - 1] > 0) THEN
+				IF (previousSeed[i - 1, j - 1] > 0) AND (NotEmpty(previousSeed[i - 1, j - 1])) THEN
 					neighbors = neighbors + 1
 				ENDIF 
 				
-				IF (previousSeed[i, j + 1] > 0) THEN
+				IF (previousSeed[i, j + 1] > 0) AND (NotEmpty(previousSeed[i, j + 1])) THEN
 					neighbors = neighbors + 1
 				ENDIF 
 				
-				IF (previousSeed[i,j - 1] > 0) THEN
+				IF (previousSeed[i,j - 1] > 0) AND (NotEmpty(previousSeed[i,j - 1])) THEN
 					neighbors = neighbors + 1
 				ENDIF 
 				
-				IF (previousSeed[i + 1,j] > 0) THEN
+				IF (previousSeed[i + 1,j] > 0) AND (NotEmpty(previousSeed[i + 1,j])) THEN
 					neighbors = neighbors + 1
 				ENDIF 
 				
-				IF (previousSeed[i + 1, j - 1] > 0) THEN
+				IF (previousSeed[i + 1, j - 1] > 0) AND (NotEmpty(previousSeed[i + 1, j - 1])) THEN
 					neighbors = neighbors + 1
 				ENDIF 
 				
-				IF (previousSeed[i + 1, j + 1] > 0) THEN
+				IF (previousSeed[i + 1, j + 1] > 0) AND (NotEmpty(previousSeed[i + 1, j + 1])) THEN
 					neighbors = neighbors + 1
 				ENDIF 
 				' ====================================================================================
@@ -105,7 +105,7 @@ WHILE (continueSimulation)
 				
 				SELECTCASE curVal 
 				CASE 1
-					IF (neighbors >= 2) AND (neighbors <= 3) THEN
+					IF (neighbors = 2) OR (neighbors = 3) THEN
 						nextVal = 1
 					ELSE 
 						nextVal = 0
@@ -164,19 +164,29 @@ WHILE (continueSimulation)
 	IF (seedCount >= 15) THEN 
 		continueSimulation = FALSE 
 	ENDIF 
+	' ====================================================================================
+	' If no Survivors, end simulation
+	hasSurvivors = FALSE
 	
+	FOR i = 1 TO arrayBounds STEP 1 
+		FOR j = 1 TO arrayBounds STEP 1
+			IF (seedArray[i,j] = 1) THEN 
+				hasSurvivors = TRUE 
+				BREAK 
+			ENDIF 
+		NEXT
+		
+		IF (hasSurvivors) THEN 
+			BREAK 
+		ENDIF
+		
+	NEXT
+	
+	IF (Not(hasSurvivors)) THEN
+		continueSimulation = FALSE 
+	ENDIF 
 	' ====================================================================================
 	seedCount = seedCount + 1
 WEND 
 ' ====================================================================================
 RETURN 
-
-
-
-
-
-
-
-
-
-
