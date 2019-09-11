@@ -158,7 +158,6 @@ WHILE (continueSimulation)
 	htmlOut = htmlOut + "</table>" + CRLF
 	
 	htmlOut = StringReplace(htmlOut, "{dblQt}", dblQt , "T") 
-	htmlOut = StringReplace(htmlOut, "{tmp}", tmp , "T")
 	
 	MsgboxHtml(htmlOut) 
 	
