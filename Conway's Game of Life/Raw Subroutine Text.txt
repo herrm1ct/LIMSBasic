@@ -59,8 +59,10 @@ WHILE (continueSimulation)
 	NEXT 
 	' ====================================================================================
 	' Update Seed
-	IF (seedCount <> 0) THEN 
+	IF (seedCount <> 0) THEN
 	
+		hasSurvivors = FALSE
+		
 		FOR i = 1 TO arrayBounds STEP 1 
 			FOR j = 1 TO arrayBounds STEP 1
 				' ====================================================================================
@@ -117,6 +119,10 @@ WHILE (continueSimulation)
 				CASE ELSE 				
 				ENDSELECT
 					
+				IF (nextVal = 1) AND (Not(hasSurvivors)) THEN
+					hasSurvivors = TRUE
+				ENDIF
+					
 				seedArray[i,j] = nextVal 
 				' ====================================================================================
 			NEXT 
@@ -166,21 +172,6 @@ WHILE (continueSimulation)
 	ENDIF 
 	' ====================================================================================
 	' If no Survivors, end simulation
-	hasSurvivors = FALSE
-	
-	FOR i = 1 TO arrayBounds STEP 1 
-		FOR j = 1 TO arrayBounds STEP 1
-			IF (seedArray[i,j] = 1) THEN 
-				hasSurvivors = TRUE 
-				BREAK 
-			ENDIF 
-		NEXT
-		
-		IF (hasSurvivors) THEN 
-			BREAK 
-		ENDIF
-		
-	NEXT
 	
 	IF (Not(hasSurvivors)) THEN
 		continueSimulation = FALSE 
