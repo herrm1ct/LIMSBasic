@@ -24,15 +24,15 @@ DECLARE i j seedArray
 
 FOR i = 1 TO arrayBounds STEP 1 
 	FOR j = 1 TO arrayBounds STEP 1
-		
+
 		seedArray[i,j] = Rnd(1) 
-		
+
 		IF (seedArray[i,j] >= liveCellCutoff) THEN 
 			seedArray[i,j] = 1
 		ELSE 
 			seedArray[i,j] = 0
 		ENDIF
-		
+
 	NEXT 
 NEXT 
 ' ====================================================================================
@@ -50,100 +50,91 @@ continueSimulation = TRUE
 WHILE (continueSimulation)
 	' ====================================================================================
 	' Cache Previous Seed
-	status = ClearArray("previousSeed") 
+	' (Assignment only moves pointer, doesn't actually duplicate array)
+	status = ClearArray("previousSeed")
 	
-	FOR i = 1 TO arrayBounds STEP 1 
-		FOR j = 1 TO arrayBounds STEP 1
-			previousSeed[i,j] = seedArray[i,j] 
-		NEXT 
-	NEXT 
-	' ====================================================================================
-	' Update Seed
-	IF (seedCount <> 0) THEN
-	
-		hasSurvivors = FALSE
-		
-		FOR i = 1 TO arrayBounds STEP 1 
-			FOR j = 1 TO arrayBounds STEP 1
-				' ====================================================================================
-				' Determine Neighbor Count
-				neighbors = 0
-				curVal = previousSeed[i,j] 
-				
-				IF (previousSeed[i - 1,j] > 0) AND (NotEmpty(previousSeed[i - 1,j])) THEN
-					neighbors = neighbors + 1
-				ENDIF 
-				
-				IF (previousSeed[i - 1, j + 1] > 0) AND (NotEmpty(previousSeed[i - 1, j + 1])) THEN
-					neighbors = neighbors + 1
-				ENDIF 
-				
-				IF (previousSeed[i - 1, j - 1] > 0) AND (NotEmpty(previousSeed[i - 1, j - 1])) THEN
-					neighbors = neighbors + 1
-				ENDIF 
-				
-				IF (previousSeed[i, j + 1] > 0) AND (NotEmpty(previousSeed[i, j + 1])) THEN
-					neighbors = neighbors + 1
-				ENDIF 
-				
-				IF (previousSeed[i,j - 1] > 0) AND (NotEmpty(previousSeed[i,j - 1])) THEN
-					neighbors = neighbors + 1
-				ENDIF 
-				
-				IF (previousSeed[i + 1,j] > 0) AND (NotEmpty(previousSeed[i + 1,j])) THEN
-					neighbors = neighbors + 1
-				ENDIF 
-				
-				IF (previousSeed[i + 1, j - 1] > 0) AND (NotEmpty(previousSeed[i + 1, j - 1])) THEN
-					neighbors = neighbors + 1
-				ENDIF 
-				
-				IF (previousSeed[i + 1, j + 1] > 0) AND (NotEmpty(previousSeed[i + 1, j + 1])) THEN
-					neighbors = neighbors + 1
-				ENDIF 
-				' ====================================================================================
-				' Update next generation value
-				nextVal = 0
-				
-				SELECTCASE curVal 
-				CASE 1
-					IF (neighbors = 2) OR (neighbors = 3) THEN
-						nextVal = 1
-					ELSE 
-						nextVal = 0
-					ENDIF 
-				CASE 0
-					IF (neighbors = 3) THEN 
-						nextVal = 1
-					ENDIF 
-				CASE ELSE 				
-				ENDSELECT
-					
-				IF (nextVal = 1) AND (Not(hasSurvivors)) THEN
-					hasSurvivors = TRUE
-				ENDIF
-					
-				seedArray[i,j] = nextVal 
-				' ====================================================================================
-			NEXT 
-		NEXT
-		
-	ENDIF 
+	tmp = ArrayToCSVString(seedArray, ",") 
+	status = ArrayFromCSVString(tmp, ",", "", "T", "previousSeed") 
 	' ====================================================================================
 	' Build HTML Text
 	htmlOut = ""
 	htmlOut = htmlOut + "<h3>Current Generation: " + seedCount + "</h3>" + CRLF
 	htmlOut = htmlOut + "<table width={dblQt}100%{dblQt} height={dblQt}300px{dblQt} border={dblQt}1px{dblQt}>" + CRLF
-	
+	' ====================================================================================
+	' Update Seed
+
+	hasSurvivors = FALSE
+
 	FOR i = 1 TO arrayBounds STEP 1 
 		
 		htmlOut = htmlOut + "<tr>" + CRLF
 		
 		FOR j = 1 TO arrayBounds STEP 1
+			' ====================================================================================
+			' Determine Neighbor Count
+			neighbors = 0
+			curVal = previousSeed[i,j] 
+
+			IF (previousSeed[i - 1,j] > 0) AND (NotEmpty(previousSeed[i - 1,j])) THEN
+				neighbors = neighbors + 1
+			ENDIF 
+
+			IF (previousSeed[i - 1, j + 1] > 0) AND (NotEmpty(previousSeed[i - 1, j + 1])) THEN
+				neighbors = neighbors + 1
+			ENDIF 
+
+			IF (previousSeed[i - 1, j - 1] > 0) AND (NotEmpty(previousSeed[i - 1, j - 1])) THEN
+				neighbors = neighbors + 1
+			ENDIF 
+
+			IF (previousSeed[i, j + 1] > 0) AND (NotEmpty(previousSeed[i, j + 1])) THEN
+				neighbors = neighbors + 1
+			ENDIF 
+
+			IF (previousSeed[i,j - 1] > 0) AND (NotEmpty(previousSeed[i,j - 1])) THEN
+				neighbors = neighbors + 1
+			ENDIF 
+
+			IF (previousSeed[i + 1,j] > 0) AND (NotEmpty(previousSeed[i + 1,j])) THEN
+				neighbors = neighbors + 1
+			ENDIF 
+
+			IF (previousSeed[i + 1, j - 1] > 0) AND (NotEmpty(previousSeed[i + 1, j - 1])) THEN
+				neighbors = neighbors + 1
+			ENDIF 
+
+			IF (previousSeed[i + 1, j + 1] > 0) AND (NotEmpty(previousSeed[i + 1, j + 1])) THEN
+				neighbors = neighbors + 1
+			ENDIF 
+			' ====================================================================================
+			' Update next generation value
+			nextVal = 0
+
+			SELECTCASE curVal 
+			CASE 1
+				IF (neighbors = 2) OR (neighbors = 3) THEN
+					nextVal = 1
+				ELSE 
+					nextVal = 0
+				ENDIF 
+			CASE 0
+				IF (neighbors = 3) THEN 
+					nextVal = 1
+				ENDIF 
+			CASE ELSE 				
+			ENDSELECT
+
+			IF (nextVal = 1) AND (Not(hasSurvivors)) THEN
+				hasSurvivors = TRUE
+			ENDIF
+
+			seedArray[i,j] = nextVal 
+			' ====================================================================================
+			' Build HTML Text
 
 			tmp = "000000"
-			
-			SELECTCASE seedArray[i,j]
+
+			SELECTCASE nextVal
 			CASE 1
 				tmp = liveColor 
 			CASE 0
@@ -153,26 +144,25 @@ WHILE (continueSimulation)
 
 			htmlOut = htmlOut + "<td bgcolor={dblQt}#{tmp}{dblQt}> </td>" + CRLF
 			htmlOut = StringReplace(htmlOut, "{tmp}", tmp , "T")
-			
+			' ====================================================================================
 		NEXT
-		
+
 		htmlOut = htmlOut + "</tr>" + CRLF
-		
+
 	NEXT
 	' ====================================================================================
 	' Display to User and Prompt
 	htmlOut = htmlOut + "</table>" + CRLF
-	
+
 	htmlOut = StringReplace(htmlOut, "{dblQt}", dblQt , "T") 
-	
+
 	MsgboxHtml(htmlOut) 
-	
-	IF (seedCount >= 15) THEN 
+
+	IF (seedCount >= 25) THEN 
 		continueSimulation = FALSE 
 	ENDIF 
 	' ====================================================================================
 	' If no Survivors, end simulation
-	
 	IF (Not(hasSurvivors)) THEN
 		continueSimulation = FALSE 
 	ENDIF 
